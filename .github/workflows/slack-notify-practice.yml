@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Slack notify
         uses: slackapi/slack-github-action@v1.26.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         with:
           channel-id: "C02U16MMDAS"
           payload: |
@@ -35,6 +37,3 @@ jobs:
                  ]
                }
              ]
-            }
-          env:
-            SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
