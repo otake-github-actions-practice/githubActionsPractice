@@ -40,8 +40,8 @@ jobs:
           terraform fmt -check
       - name: Debug
         run: |
-          echo ${secrets.MYSQL_USERNAME}
-          echo ${secrets.AWS_IAM_ROLE_ARN}
+          echo ${{secrets.MYSQL_USERNAME}}
+          echo ${{secrets.AWS_IAM_ROLE_ARN}}
 
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v4
