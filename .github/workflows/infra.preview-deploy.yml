@@ -28,6 +28,8 @@ jobs:
   preview:
     name: "Preview"
     runs-on: ubuntu-latest
+    outputs:
+      IF_PLAN_EXITCODE: ${{steps.plan.outputs.exitcode}}
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -38,23 +40,20 @@ jobs:
       - name: Terraform format
         run: |
           terraform fmt -check
-      - name: Debug
-        run: |
-          echo ${{secrets.MYSQL_USERNAME}}
-          echo ${{secrets.AWS_IAM_ROLE_ARN}}
-
       - name: Configure AWS credential
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{env.AWS_REGION}}
           role-to-assume: ${{secrets.AWS_IAM_ROLE_ARN}}
       - name: Terraform init
+        id: plan
         run: |
           terraform init -no-color
       - name: Terraform validate
         run: |
           terraform validate -no-color
       - name: Terraform plan
+        continue-on-error: true
         run: |
           terraform plan \
             -var 'project=${{env.TF_PROJECT}}' \
@@ -64,3 +63,33 @@ jobs:
             -input=false \
             -no-color \
             -detailed-exitcode
+      - name: Slack notify
+        uses: slackapi/slack-github-action@v1.26.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        with:
+          channel-id: "C02U16MMDAS"
+          payload: |
+            {
+             "attachments": [
+               {
+                 "blocks": [
+                   {
+                     "type": "section",
+                     "text": {
+                       "type": "mrkdwn",
+                       "text": "This is a mrkdwn section block :ghost: *this is bold*, and ~this is crossed out~, and <https://google.com|this is a link>"
+                     }
+                   },
+                   {
+                     "type": "header",
+                     "text": {
+                       "type": "plain_text",
+                       "text": "This is a header block ${{github.server_url}}/${{github.repository}} /actions/runs/${{github.run_id}}",
+                       "emoji": true
+                     }
+                   }
+                 ]
+               }
+             ]
+            }
