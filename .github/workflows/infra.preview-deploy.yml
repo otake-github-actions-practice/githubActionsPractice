@@ -118,3 +118,12 @@ jobs:
         id: plan
         run: |
           terraform init -no-color
+      - name: Terraform apply
+        run: |
+          -var 'project=${{env.TF_PROJECT}}' \
+          -var 'environment=${{env.TF_ENVIRONMENT}}' \
+          -var 'username=${{secrets.MYSQL_USERNAME}}' \
+          -var 'password=${{secrets.MYSQL_PASSWORD}}' \
+          -input=false \
+          -no-color \
+          -auto-approve
